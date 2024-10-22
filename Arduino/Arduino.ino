@@ -1,6 +1,10 @@
 #include <string>
 #include "WiFiS3.h"
 #include "Arduino_secrets.h"
+#include "fastLED.h"
+
+#define NUM_LEDS 60
+#define DATA_PIN 6
 
 char ssid[] = WIFI_NETWORK_NAME;
 char pass[] = WIFI_PASSWORD;
@@ -12,6 +16,7 @@ int status = WL_IDLE_STATUS;
 
 void setup() {
   Serial.begin(9600);
+  FastLED.addLeds<60>
 
   while (!Serial);
 

@@ -41,34 +41,41 @@ export default function HomeScreen() {
     };
   }
   return (
-    <View style={styles.container}>
-      <Button title='Color Picker' style={ } onPress={() => setShowModal(true)} />
+    <ThemedView style={styles.container}>
+      <Pressable onPress={() => setShowModal(true)} style={styles.Button}>
+        <ThemedText>Open Color Picker</ThemedText>
+      </Pressable>
+
 
       <Modal visible={showModal} animationType='slide'>
-        <ColorPicker
-          value={selectedColor}
-          onComplete={onSelectColor}
-          style={{ width: '70%' }} >
+        <ThemedView style={styles.colorSelector}>
+          <ColorPicker
+            value={selectedColor}
+            onComplete={onSelectColor}
+            style={{ width: '70%' }} >
 
-          <Preview />
-          <Panel1 />
-          <HueSlider />
-        </ColorPicker>
-        <View style={styles.BrightnessSliderContainer}>
-          <ThemedText>Adjust Brightness</ThemedText>
-          <Slider
-            minimumValue={0}
-            maximumValue={255}
-            value={brightness}
-            onValueChange={(value) => setBrightness(Math.round(value))}
-            onSlidingComplete={(value) => sendColorToServer(selectedColor, Math.round(value))}
-          />
-        </View>
+            <Preview />
+            <Panel1 />
+            <HueSlider />
+          </ColorPicker>
+          <ThemedView style={styles.BrightnessSliderContainer}>
+            <ThemedText>Adjust Brightness</ThemedText>
+            <Slider
+              minimumValue={0}
+              maximumValue={255}
+              value={brightness}
+              onValueChange={(value) => setBrightness(Math.round(value))}
+              onSlidingComplete={(value) => sendColorToServer(selectedColor, Math.round(value))}
+            />
+          </ThemedView>
 
-        <Button title='Close' onPress={() => setShowModal(false)} />
-      </Modal>
+          <Pressable onPress={() => setShowModal(false)} style={styles.Button}>
+            <ThemedText>Close Color Picker</ThemedText>
+          </Pressable>
+        </ThemedView>
+      </Modal >
 
-    </View>
+    </ThemedView >
   );
 }
 
@@ -76,12 +83,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   BrightnessSliderContainer: {
     padding: 20,
   },
   Button: {
-    padding: 20,
+    padding: 10,
+    backgroundColor: '#8D99AE',
+    borderWidth: 1,
+    borderColor: 'grey',
+    borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+
+  },
+  colorSelector: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   }
 });
 

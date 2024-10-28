@@ -1,32 +1,73 @@
-import { Image, StyleSheet, Platform, Text, View, Button, Modal } from 'react-native';
+import { StyleSheet, View, Modal, Pressable } from 'react-native';
+import Slider from '@react-native-community/slider';
+
+import ColorPicker, { Panel1, Preview, OpacitySlider, HueSlider } from 'reanimated-color-picker';
 import { useState } from 'react';
+
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
-import ColorPicker, { Panel5, Swatches, Preview, OpacitySlider, HueSlider } from 'reanimated-color-picker';
+
 export default function HomeScreen() {
   const [showModal, setShowModal] = useState(false);
-  const onSelectColor = ({ hex }: { hex: string }) => {
-    console.log(hex);
+  const [selectedColor, setSelectedColor] = useState('red');
+  const [brightness, setBrightness] = useState(255);
+
+
+  type Color = {
+    hex: string
+  };
+
+  const onSelectColor = (color: Color) => {
+    const hexColor = color.hex;
+    setSelectedColor(hexColor);
+    sendColorToServer(hexColor, brightness)
+  };
+
+  const sendColorToServer = async (color: string, brightness: number) => {
+    try {
+      await fetch('http://10.71.108.190:3000/led/color', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ color, brightness }),
+      });
+    } catch (error) {
+      console.error('Error:', error);
+    };
   }
   return (
     <View style={styles.container}>
-      <Button title='Color Picker' onPress={() => setShowModal(true)} />
+      <Button title='Color Picker' style={ } onPress={() => setShowModal(true)} />
 
       <Modal visible={showModal} animationType='slide'>
-        <ColorPicker style={{ width: '70%' }} value='red' onComplete={onSelectColor}>
+        <ColorPicker
+          value={selectedColor}
+          onComplete={onSelectColor}
+          style={{ width: '70%' }} >
 
           <Preview />
-          <Panel5 />
+          <Panel1 />
           <HueSlider />
-          <OpacitySlider />
         </ColorPicker>
+        <View style={styles.BrightnessSliderContainer}>
+          <ThemedText>Adjust Brightness</ThemedText>
+          <Slider
+            minimumValue={0}
+            maximumValue={255}
+            value={brightness}
+            onValueChange={(value) => setBrightness(Math.round(value))}
+            onSlidingComplete={(value) => sendColorToServer(selectedColor, Math.round(value))}
+          />
+        </View>
 
         <Button title='Close' onPress={() => setShowModal(false)} />
       </Modal>
+
     </View>
   );
 }
@@ -36,16 +77,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  BrightnessSliderContainer: {
+    padding: 20,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+  Button: {
+    padding: 20,
+  }
 });
 

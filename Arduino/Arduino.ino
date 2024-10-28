@@ -29,8 +29,6 @@ void setup() {
     delay(10000);
     Serial.print("status:");
     Serial.print(status);
-    
-
   }
   Serial.println("CONNECTED TO WIFI ");
   Serial.println(status);
@@ -52,16 +50,31 @@ void loop() {
 
   if (Serial.available() > 0) {
     String color = Serial.readStringUntil('\n');
-    Serial.print("Revived color: ");
+    Serial.print("Revived RGB values and brightness: ");
     Serial.println(color);
 
-    int r, g, b;
-    sscanf(color.c_str(), "%d,%d,%d", &r, &g, &b);
+    int r, g, b, brightness;
+    sscanf(color.c_str(), "%d,%d,%d,%d", &r, &g, &b, &brightness);
+
+    Serial.print("Parsed values - R: ");
+    Serial.print(r);
+    Serial.print(", G: ");
+    Serial.print(g);
+    Serial.print(", B: ");
+    Serial.print(b);
+    Serial.print(", Brightness: ");
+    Serial.println(brightness);
+
+   
 
     for (int i = 0; i < NUM_LEDS; i++) {
-      leds[i] = CRGB(g, r, b);
+      leds[i] = CRGB(r, g, b);
     }
+    
+    FastLED.setBrightness(brightness);
     FastLED.show();
+    
     Serial.println("LEDs Updated");
+    Serial.println("Update complete");
   }
 }

@@ -1,7 +1,7 @@
 import { StyleSheet, View, Modal, Pressable } from 'react-native';
 import Slider from '@react-native-community/slider';
 
-import ColorPicker, { Panel1, Preview, OpacitySlider, HueSlider } from 'reanimated-color-picker';
+import ColorPicker, { Panel1, Preview, HueSlider } from 'reanimated-color-picker';
 import { useState } from 'react';
 
 
@@ -85,9 +85,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+
   BrightnessSliderContainer: {
     padding: 20,
   },
+
   Button: {
     padding: 10,
     backgroundColor: '#8D99AE',

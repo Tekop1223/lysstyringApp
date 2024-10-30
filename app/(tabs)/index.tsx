@@ -3,7 +3,8 @@
 // must have imports
 import { StyleSheet, View, Modal, Pressable, TouchableOpacity } from 'react-native';
 import { useState, useEffect } from 'react';
-import { FlatList } from 'react-native-reanimated/lib/typescript/Animated';
+import Animated from 'react-native-reanimated';
+
 
 // custom imports
 import Slider from '@react-native-community/slider';
@@ -34,7 +35,10 @@ export default function HomeScreen() {
   useEffect(() => {
     const fetchLedColors = async () => {
       try {
-        const response = await fetch(`http://${process.env.SERVER_IP}:3000/led/colors`)
+        const response = await fetch(`http://192.168.0.242:3000/led/colors`)
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
         const data = await response.json();
         setLedColors(data.colors);
         setBrightness(data.brightness);
@@ -56,7 +60,7 @@ export default function HomeScreen() {
 
   const sendColorToServer = async (color: string[], brightness: number) => {
     try {
-      await fetch(`http://${process.env.SERVER_IP}:3000/led/colors`, {
+      await fetch(`http://192.168.0.242:3000/led/colors`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,16 +73,16 @@ export default function HomeScreen() {
   }
   return (
     <ThemedView style={styles.container}>
-      <FlatList
-        data={ledColors}
-        renderItem={({ item, index }) => (
-          <TouchableOpacity onPress={() => setShowModal(index)}>
-            <View style={[styles.led, { backgroundColor: item }]} />
-          </TouchableOpacity>
-        )}
-        keyExtractor={(item, index) => index.toString()}
-        numColumns={10}
-      />
+    <Animated.FlatList
+      data={ledColors}
+      renderItem={({ item, index }) => (
+        <TouchableOpacity onPress={() => setShowModal(index)}>
+          <View style={[styles.led, { backgroundColor: item }]} />
+        </TouchableOpacity>
+      )}
+      keyExtractor={(item, index) => index.toString()}
+      numColumns={10}
+/>
 
       <Modal visible={showModal !== false} animationType='slide'>
         <ThemedView style={styles.colorSelector}>

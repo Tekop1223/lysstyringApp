@@ -6,7 +6,7 @@ const app = express();
 const port = 3000;
 
 const arduinoPort = new SerialPort({
-    path: 'COM20',
+    path: 'COM3',
     baudRate: 9600,
     autoOpen: false,
 });
@@ -35,7 +35,7 @@ parser.on('data', (data) => {
 app.use(express.json());
 
 const uri = 'mongodb://localhost:27017/';
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+const client = new MongoClient(uri);
 
 client.connect((err) => {
     if (err) {

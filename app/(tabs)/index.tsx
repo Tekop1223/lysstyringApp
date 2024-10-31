@@ -3,13 +3,14 @@
 // must have imports
 import { StyleSheet, View, Modal, Pressable, TouchableOpacity } from 'react-native';
 import { useState, useEffect } from 'react';
-import Animated from 'react-native-reanimated';
+
 
 
 // custom imports
 import Slider from '@react-native-community/slider';
 import ColorPicker, { Panel1, Preview, HueSlider } from 'reanimated-color-picker';
-import { array } from 'prop-types';
+import Animated from 'react-native-reanimated';
+
 
 
 // expo imports
@@ -35,7 +36,8 @@ export default function HomeScreen() {
   useEffect(() => {
     const fetchLedColors = async () => {
       try {
-        const response = await fetch(`http://192.168.0.242:3000/led/colors`)
+        console.log(process.env.SERVER_IP)
+        const response = await fetch(`http://${process.env.SERVER_IP}:3000/led/colors`)
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
@@ -60,7 +62,7 @@ export default function HomeScreen() {
 
   const sendColorToServer = async (color: string[], brightness: number) => {
     try {
-      await fetch(`http://192.168.0.242:3000/led/colors`, {
+      await fetch(`http://${process.env.SERVER_IP}:3000/led/colors`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -73,16 +75,16 @@ export default function HomeScreen() {
   }
   return (
     <ThemedView style={styles.container}>
-    <Animated.FlatList
-      data={ledColors}
-      renderItem={({ item, index }) => (
-        <TouchableOpacity onPress={() => setShowModal(index)}>
-          <View style={[styles.led, { backgroundColor: item }]} />
-        </TouchableOpacity>
-      )}
-      keyExtractor={(item, index) => index.toString()}
-      numColumns={10}
-/>
+      <Animated.FlatList
+        data={ledColors}
+        renderItem={({ item, index }) => (
+          <TouchableOpacity onPress={() => setShowModal(index)}>
+            <View style={[styles.led, { backgroundColor: item }]} />
+          </TouchableOpacity>
+        )}
+        keyExtractor={(item, index) => index.toString()}
+        numColumns={10}
+      />
 
       <Modal visible={showModal !== false} animationType='slide'>
         <ThemedView style={styles.colorSelector}>

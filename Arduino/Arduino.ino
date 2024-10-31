@@ -10,7 +10,6 @@
 char ssid[] = WIFI_NETWORK_NAME;
 char pass[] = WIFI_PASSWORD;
 char server[] = WEB_ADDRESS;
-char host[] = HOST;
 
 WiFiClient client;
 int status = WL_IDLE_STATUS;
@@ -18,7 +17,9 @@ CRGB leds[NUM_LEDS];
 
 void setup() {
   Serial.begin(9600);
-  FastLED.addLeds<WS2812, DATA_PIN>(leds, NUM_LEDS); 
+  FastLED.addLeds<WS2812, DATA_PIN>(leds, NUM_LEDS);
+  FastLED.clear();
+  FastLED.show();
 
   while (!Serial);
 
@@ -53,22 +54,24 @@ void loop() {
     Serial.print("Revived RGB values and brightness: ");
     Serial.println(color);
 
-    int r, g, b, brightness;
-    sscanf(color.c_str(), "%d,%d,%d,%d", &r, &g, &b, &brightness);
+    char colorArray[color.length() + 1];
+    color.toCharArray(colorArray, color.length() + 1);
 
-    Serial.print("Parsed values - R: ");
-    Serial.print(r);
-    Serial.print(", G: ");
-    Serial.print(g);
-    Serial.print(", B: ");
-    Serial.print(b);
-    Serial.print(", Brightness: ");
-    Serial.println(brightness);
+ 
+    int brightness;
+    int r, g, b;
+    char* token = strtok(colorArray, ";");
+    int i = 0;
 
-   
-
-    for (int i = 0; i < NUM_LEDS; i++) {
+    while (token != NULL && i < NUM_LEDS) {
+      if (i == NUM_LEDS) {
+      brightness = atoi(token);
+      } else {
+      sscanf(token, "%d,%d,%d", &r, &g, &b);
       leds[i] = CRGB(r, g, b);
+      }
+      token = strtok(NULL, ";");
+      i++;
     }
     
     FastLED.setBrightness(brightness);

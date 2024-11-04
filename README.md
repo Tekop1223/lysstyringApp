@@ -6,7 +6,7 @@ This project is an LED control application that allows users to select and send 
 
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
-- [Setup](#setup)
+- [Running-the-App](#Running-the-App)
 - [Usage](#usage)
 - [License](#license)
 
@@ -27,3 +27,36 @@ git clone https://github.com/yourusername/led-control-app.git
 cd led-control-app
 ```
 
+2. Install server dependencies
+```sh
+cd server 
+npm install
+```
+
+3. Install App dependencies
+```sh
+npm install
+```
+
+
+## Running the App
+
+1. start mongodb
+
+2. start the express server
+```sh
+cd server
+node appToArduino.js
+```
+
+3. start React Native App
+```sh
+npm start
+```
+
+## Usage
+select a color from the color picker.
+the config is saved to the database.
+
+## License
+This project is licensed under the MIT License.

@@ -14,46 +14,47 @@ This project is an LED control application that allows users to select and send 
 
 Before you begin, ensure you have met the following requirements:
 
-- Node.js and npm installed on your machine
-- MongoDB installed and running on your machine
-- An Arduino connected to your machine
+- Node.js and npm installed on your machine.
+- MongoDB installed and running on your machine.
+- An Arduino connected to your machine.
 
 
 ### Extra
-- if changes in the arduino code is needed you will have to install Arduino's own IDE
+- if changes in the arduino code is needed you will have to install Arduino's own IDE.
 
 ## Installation
 
-1. Clone the repository:
+1. Clone the repository.
 
 ```sh
 git clone https://github.com/yourusername/led-control-app.git
 cd led-control-app
 ```
 
-2. Install server dependencies
+2. Install server dependencies.
 ```sh
 cd server 
 npm install
 ```
 
-3. Install App dependencies
+3. Install App dependencies.
 ```sh
 npm install
 ```
 
 
 ## Running the App
+1. find out what COM-port the arduino is connected to.
 
-1. start mongodb
+2. start mongodb.
 
-2. start the express server
+3. start the express server.
 ```sh
 cd server
 node appToArduino.js
 ```
 
-3. start React Native App
+4. start React Native App.
 ```sh
 npm start
 ```

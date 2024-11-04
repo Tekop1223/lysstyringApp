@@ -24,29 +24,29 @@ void setup() {
   while (!Serial);
 
   while (status != WL_CONNECTED) {
-    Serial.print("CONNECTING TO WIFI. ");
+    Serial.print("CONNECTING TO WIFI.");
     status = WiFi.begin(ssid, pass);
     
     delay(10000);
     Serial.print("status:");
     Serial.print(status);
   }
-  Serial.println("CONNECTED TO WIFI ");
+  Serial.println("CONNECTED TO WIFI");
   Serial.println(status);
 }
 
 void loop() {
   if (!client.connected()) {
     Serial.println();
-    Serial.println("DISCONNECTING FROM SERVER ");
+    Serial.println("DISCONNECTING FROM SERVER.");
     client.stop();
 
     // Attempt to reconnect to the server
     while (!client.connect(server, 3000)) {
-      Serial.println("RECONNECTING TO SERVER ");
+      Serial.println("RECONNECTING TO SERVER.");
       delay(2000);
     }
-    Serial.println("CONNECTED TO SERVER");
+    Serial.println("CONNECTED TO SERVER.");
   }
 
   if (Serial.available() > 0) {
@@ -77,7 +77,7 @@ void loop() {
     FastLED.setBrightness(brightness);
     FastLED.show();
     
-    Serial.println("LEDs Updated");
-    Serial.println("Update complete");
+    Serial.println("LEDs Updated.");
+    Serial.println("Update complete.");
   }
 }

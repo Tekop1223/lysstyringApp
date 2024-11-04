@@ -18,6 +18,10 @@ Before you begin, ensure you have met the following requirements:
 - MongoDB installed and running on your machine
 - An Arduino connected to your machine
 
+
+### Extra
+- if changes in the arduino code is needed you will have to install Arduino's own IDE
+
 ## Installation
 
 1. Clone the repository:

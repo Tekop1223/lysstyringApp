@@ -50,7 +50,6 @@ async function connectToMongoDB() {
     }
 }
 
-// Ensure the serial port is opened before writing to it
 arduinoPort.open((err) => {
     if (err) {
         console.error('Error opening serial port:', err.message);
@@ -81,7 +80,12 @@ arduinoPort.open((err) => {
             } else {
                 console.log('Successfully wrote to Arduino');
                 try {
-                    await collection.insertOne({ colors, brightness });
+                    const updateConfig = await collection.updateOne(
+                        { configName: 'currentConfig' },
+                        { $set: { colors, brightness } },
+                        { upsert: true }
+                    );
+                    console.log('successfully updated config:', updateConfig);
                     const rgbString = colors.join(', ') + `, ${brightness}`;
                     res.send(`Colors and brightness sent to Arduino and saved to MongoDB as ${rgbString}`);
                     console.log(`Colors and brightness sent to Arduino and saved to MongoDB as ${rgbString}`);

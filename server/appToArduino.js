@@ -1,98 +1,103 @@
 const express = require('express');
+const cors = require('cors');
 const { SerialPort } = require('serialport');
 const { ReadlineParser } = require('@serialport/parser-readline');
 const { MongoClient } = require('mongodb');
 const app = express();
 const port = 3000;
 
+app.use(cors(
+    {
+        origin: `http://localhost:${port}`,
+        methods: ['GET', 'POST'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+    }
+))
+app.use(express.json());
+
 const arduinoPort = new SerialPort({
-    path: 'COM3',
+    path: 'COM20',
     baudRate: 9600,
     autoOpen: false,
 });
 
 const parser = arduinoPort.pipe(new ReadlineParser({ delimiter: '\n' }));
 
-
-arduinoPort.open((err) => {
-    if (err) {
-        console.log('Error,', err.message);
-        process.exit(1);
-    } else {
-        console.log('Arduino connected');
-    }
-});
-
-arduinoPort.on('error', (err) => {
-    console.error('Error:', err.message);
-});
-
-//Handles incoming data from Arduino
+// serial port event listeners
 parser.on('data', (data) => {
     console.log('Data from Arduino:', data);
 });
 
-app.use(express.json());
+arduinoPort.on('open', () => {
+    console.log('Serial Port Opened');
+});
+
+arduinoPort.on('error', (err) => {
+    console.error('Error opening serial port:', err.message);
+});
 
 const uri = 'mongodb://localhost:27017/';
 const client = new MongoClient(uri);
 
-client.connect((err) => {
-    if (err) {
-        console.error('Error connecting to MongoDB:', err.message);
-        process.exit(1);
-    } else {
+async function connectToMongoDB() {
+    try {
+        await client.connect();
         console.log('Connected to MongoDB');
+        return client.db('ledControl').collection('ledConfigs');
+    } catch (err) {
+        console.error('Error connecting to MongoDB:', err.message);
+        return null;
+    }
+}
+
+// Ensure the serial port is opened before writing to it
+arduinoPort.open((err) => {
+    if (err) {
+        console.error('Error opening serial port:', err.message);
+        return;
     }
 
-    const db = client.db('ledControl');
-    const collection = db.collection('ledConfigs');
-
     app.post('/led/colors', async (req, res) => {
+        console.log('Received POST /led/colors with body:', req.body);
+
+        const collection = await connectToMongoDB();
+        if (!collection) {
+            return res.status(500).send({ error: 'Error connecting to MongoDB' });
+        }
         const { colors, brightness } = req.body;
+
+        if (!Array.isArray(colors) || typeof brightness !== 'number') {
+            console.error('Invalid color or brightness:', req.body);
+            return res.status(400).send({ error: 'Invalid color or brightness' });
+        }
         console.log(`Received colors: ${colors}, brightness: ${brightness}`);
 
-        // Convert hex color to RGB values
-        const rgbColors = colors.map(color => {
-            if (color.length === 7 && color[0] === '#') {
-                const r = parseInt(color.slice(1, 3), 16);
-                const g = parseInt(color.slice(3, 5), 16);
-                const b = parseInt(color.slice(5, 7), 16);
-                return `${r},${g},${b}`;
-            } else {
-                res.status(400).send('Invalid color format');
-                console.log('Invalid color format');
-                return null;
-            }
-        });
+        const ColorString = colors.join(';') + `;${brightness}\n`;
 
-        if (rgbColors.includes(null)) {
-            return; // Exit if any color format is invalid
-        }
-
-        const rgbString = rgbColors.join(';') + `;${brightness}\n`;
-
-        arduinoPort.write(rgbString, async (err) => {
+        arduinoPort.write(ColorString, async (err) => {
             if (err) {
                 console.error('Error writing to port:', err.message);
-                return res.status(500).send('Error writing to Arduino');
-            }
-
-            try {
-                await collection.updateOne(
-                    { configName: 'currentConfig' },
-                    { $set: { colors, brightness } },
-                    { upsert: true }
-                );
-                res.send(`Colors and brightness sent to Arduino and saved to MongoDB as ${rgbString}`);
-                console.log(`Colors and brightness sent to Arduino and saved to MongoDB as ${rgbString}`);
-            } catch (dbErr) {
-                console.error('Error saving to MongoDB:', dbErr.message);
-                res.status(500).send('Error saving to MongoDB');
+                res.status(500).send({ error: 'Failed to write to Arduino' });
+            } else {
+                console.log('Successfully wrote to Arduino');
+                try {
+                    await collection.insertOne({ colors, brightness });
+                    const rgbString = colors.join(', ') + `, ${brightness}`;
+                    res.send(`Colors and brightness sent to Arduino and saved to MongoDB as ${rgbString}`);
+                    console.log(`Colors and brightness sent to Arduino and saved to MongoDB as ${rgbString}`);
+                } catch (dbErr) {
+                    console.error('Error saving to MongoDB:', dbErr.message);
+                    res.status(500).send('Error saving to MongoDB');
+                }
             }
         });
     });
+
     app.get('/led/colors', async (req, res) => {
+        const collection = await connectToMongoDB();
+        if (!collection) {
+            return res.status(500).send({ error: 'Error connecting to MongoDB' });
+        }
         try {
             const config = await collection.findOne({ configName: 'currentConfig' });
             if (config) {
@@ -100,15 +105,13 @@ client.connect((err) => {
             } else {
                 res.status(404).send('Config not found');
             }
-        } catch (dbErr) {
-            console.error('Error fetching from MongoDB:', dbErr.message);
-            res.status(500).send('Error fetching from MongoDB');
+        } catch (error) {
+            console.error('Error retrieving config from MongoDB:', error.message);
+            res.status(500).send('Error retrieving config from MongoDB');
         }
     });
 
-
     app.listen(port, () => {
-        console.log();
-        console.log(`Server is running on port ${port}`);
+        console.log(`Server running on port ${port}`);
     });
 });
